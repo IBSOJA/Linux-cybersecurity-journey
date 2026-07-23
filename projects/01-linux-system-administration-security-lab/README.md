@@ -183,3 +183,9 @@ In this section, I explore Linux Process management using the 'ps', 'top', and '
 ### Running Services
 
 ![sevices](screenshots/services.png)
+
+### Security Observation
+
+'confidential.txt' was intentionally assigned '600' permissions. When the ownership was change 
+to 'bob', Git could not add the file because the current user(vboxuser) no longer had permission to read 
+it. Restoring ownership to 'vboxuser' allow Git to index the file successfully. 
