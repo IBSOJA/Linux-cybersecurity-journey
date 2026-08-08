@@ -27,11 +27,11 @@ The goal is to apply Linux knowledge in a practical  environment and the documen
 - Shell: Bash
 
 ## Project Structure
-'''test
+
 01-linux-system-administration-security-lab/
-  -README.md
-  -scripts/
-  -screenshorts/
+├── README.md
+├── permission-lab/
+└── screenshots/
 
 ## System Baseline
 
@@ -55,6 +55,7 @@ The goal is to apply Linux knowledge in a practical  environment and the documen
 - Uptime: Approximately 16 minutes during baseline collection
 
 ### Network information
+
 - Primary Interface: enp0s3
 - IPv4 Address: 10.0.2.15/24
 - Loopback Address: 127.0.01
@@ -82,6 +83,7 @@ Assess local user accountsand administrative privileges
 - No additional users were found with administrative ('sudo') privileges
 
 ### Security Observation
+
 The system follows the principle of least principle for the assessed user accounts because administrative access is limited to the primary administrator account ('vboxuser').
 
 ## File Permission and Ownership Secuirty Assessment
@@ -117,7 +119,6 @@ permission were configured as follows:
 ### Security Observation
 
 Applying appropriate file permissions reduces the attack surface and enforces the principle of least privileges.
-
 Sensitive file should not be readable by unauthorized user, while executable scripts containing confidential information should be restricted to the file owner.
 
 ## File Ownership Security Assessment
@@ -134,7 +135,6 @@ Understand how Linux file ownership affects access control and system security
 The ownership concepts were explored using:
 
 - chown (change file owner)
-
 - chgrp (change fil group)
 
 The group ownership of public 'public.txt' was changed to the 'developers' group for analysis.
@@ -146,11 +146,9 @@ Changing a file's owner or group does not automatically change its permission.
 Access decisions are base on both: 
 
 - File ownership
-
 - file permissions
 
 A user who belongs to the file's group may still be unable to modify the file if the group permission do not include write ('w') access.
-
 This demonstrate that ownership and permission work together to enforce the principle of least privilege.
 
 
@@ -160,17 +158,14 @@ In this section, I explore Linux Process management using the 'ps', 'top', and '
 
 ### command Practiced
 
-'''bash
-
+```bash
 - ps 
-
 - ps -ef
-
 - ps -ef | grep bash
-
 - top
-
 - systemctl --type=service --state=running
+```
+### Screenshots
 
 ### ps / ps -ef
 
