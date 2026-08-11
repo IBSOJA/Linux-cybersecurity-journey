@@ -1,0 +1,40 @@
+PROJECT 3 — ERADICATION AND RECOVERY
+
+Eradication
+
+The simulated persistence mechanism was identified as:
+
+/etc/cron.d/security-update
+
+The file was removed after preserving an evidence copy.
+
+Additional searches confirmed that no remaining references to
+"security-update" were present under /etc/cron*.
+
+A search of /etc/cron.d also confirmed that the simulated
+command SIMULATED_SECURITY_EVENT was no longer present.
+
+Recovery Verification
+
+The cron service remains active and running.
+
+No new SIMULATED_SECURITY_EVENT entries were observed in the
+cron journal after containment.
+
+The historical log file remains preserved:
+
+/var/log/security-lab.log
+
+The log was not deleted or modified during incident response.
+
+Recovery Assessment
+
+The simulated persistence mechanism has been eradicated.
+The cron service continues to operate normally.
+No evidence of continued execution by the simulated task
+was observed after containment.
+
+Status
+
+ERADICATION COMPLETE
+RECOVERY VERIFIED

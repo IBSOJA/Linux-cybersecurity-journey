@@ -1,0 +1,1 @@
+*/5 * * * * root echo "SIMULATED_SECURITY_EVENT" >> /var/log/security-lab.log

@@ -1,0 +1,79 @@
+PROJECT 3 — INCIDENT TIMELINE
+
+Initial Alert
+An unexpected cron job named security-update was identified in /etc/cron.d.
+
+Initial Finding
+The cron job was configured to execute every 5 minutes as root.
+
+Execution Confirmed
+Cron logs confirmed that the scheduled command executed successfully.
+
+Artifact Identified
+The cron job writes SIMULATED_SECURITY_EVENT to /var/log/security-lab.log.
+
+Evidence Collected
+- /etc/cron.d/security-update
+- /var/log/security-lab.log
+- cron journal entries
+
+Current Assessment
+The scheduled task is confirmed to be active and executing with root privileges.
+The activity is part of the simulated incident and requires further investigation
+before containment or removal.
+
+Status
+Investigation in progress.
+
+
+---------------------------------------------------------------------
+
+
+File Metadata Investigation
+
+The suspicious cron file /etc/cron.d/security-update was examined using stat.
+
+Findings:
+- Owner: root
+- Group: root
+- Permissions: 0644
+- File size: 78 bytes
+- Creation time: 2026-08-09 20:02:51 UTC
+- Modification time: 2026-08-09 20:02:51 UTC
+- Metadata change time: 2026-08-09 20:02:51 UTC
+
+Assessment:
+The file is owned by root and was created with standard cron configuration
+permissions. The creation timestamp will be used to correlate the file with
+other system activity during the investigation.
+
+Status:
+Investigation in progress.
+
+
+--------------------------------------
+
+
+Eradication
+
+The suspicious cron configuration was removed after preserving
+the original artifact as evidence.
+
+Additional searches of cron configuration confirmed that no
+remaining references to security-update or the simulated event
+command were present.
+
+Recovery
+
+The cron service remained active and operational after removal
+of the simulated persistence mechanism.
+
+Post-containment journal review showed no new
+SIMULATED_SECURITY_EVENT executions.
+
+The historical security-lab.log was preserved as evidence.
+
+Recovery Status
+
+VERIFIED — No continued execution of the simulated persistence
+mechanism was observed.

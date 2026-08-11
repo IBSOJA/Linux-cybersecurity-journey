@@ -1,0 +1,49 @@
+PROJECT 3 — INITIAL SYSTEM BASELINE
+
+Date: 2026-08-09
+Hostname: Ubuntu
+Current User: vboxuser
+
+1. USER AND LOGIN BASELINE
+
+- Current logged-in users: [record what `who` showed]
+- Recent login activity: [record the relevant result from `last -n 10`]
+- SSH activity: [record what `journalctl -u ssh --no-pager -n 20` showed]
+
+2. PROCESS BASELINE
+
+- Running processes reviewed.
+- No suspicious process identified during initial baseline review.
+
+3. NETWORK BASELINE
+
+- Listening ports reviewed using `ss -tuln`.
+- Active network connections reviewed using `sudo ss -tunp`.
+- Expected services and listening ports recorded.
+
+4. SERVICE BASELINE
+
+- Running services reviewed using `systemctl --type=service --state=running`.
+- No immediately suspicious service identified during the baseline review.
+
+5. CRON BASELINE
+
+- vboxuser has no personal crontab.
+- /etc/crontab contains standard system scheduling.
+- /etc/cron.d contains:
+  - anacron
+  - e2scrub_all
+  - sysstat
+  - .placeholder
+
+6. LOG BASELINE
+
+- Recent system journal reviewed using `journalctl -n 20`.
+- SSH-related logs reviewed using `journalctl -u ssh --no-pager -n 20`.
+- No incident conclusion made from baseline alone.
+
+BASELINE CONCLUSION
+
+The Ubuntu system was reviewed before the simulated incident.
+This baseline represents the expected system state against which
+subsequent changes will be compared.

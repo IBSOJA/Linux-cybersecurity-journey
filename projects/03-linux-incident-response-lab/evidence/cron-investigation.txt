@@ -1,0 +1,79 @@
+PROJECT 3 — CRON INVESTIGATION EVIDENCE
+
+Artifact:
+ /etc/cron.d/security-update
+
+File Ownership and Permissions:
+- Owner: root
+- Group: root
+- Permissions: 0644
+
+Cron Configuration:
+*/5 * * * * root echo "SIMULATED_SECURITY_EVENT" >> /var/log/security-lab.log
+
+Execution:
+- The cron service is active and running.
+- Cron journal entries confirmed execution of the scheduled command.
+- The command executes as root.
+
+Log Artifact:
+ /var/log/security-lab.log
+
+Log Contents:
+- Multiple SIMULATED_SECURITY_EVENT entries were observed.
+- The entries confirm that the cron command executed successfully.
+
+Relevant Authentication/Sudo Evidence:
+
+At 20:01:50:
+vboxuser used sudo to open /etc/cron.d/security-update with nano.
+
+At 20:02:52:
+The sudo session closed.
+
+At 20:05:01:
+Cron executed the security-update command as root.
+
+At 20:07:03:
+vboxuser again used sudo to open the cron file.
+
+At 20:09:25:
+vboxuser used sudo to read the cron configuration.
+
+Assessment:
+
+The security-update cron job was successfully confirmed as an active
+scheduled task executing with root privileges.
+
+The sudo journal evidence shows that vboxuser accessed the file using
+sudo before the scheduled execution.
+
+The resulting SIMULATED_SECURITY_EVENT entries in
+/var/log/security-lab.log provide additional evidence that the task
+executed successfully.
+
+This is a controlled simulated incident created for the laboratory.
+In a real investigation, the identity and authorization of the user
+who created or modified the cron job would require verification.
+
+Status:
+Evidence collection complete.
+Further investigation required before containment.
+
+
+----------------------------------------------
+
+
+EVIDENCE PRESERVATION
+
+Before containment, a preserved copy of the suspicious cron configuration
+was created.
+
+Original:
+ /etc/cron.d/security-update
+
+Evidence Copy:
+ evidence/security-update.evidence
+
+The preserved file contains the original cron configuration and was
+collected before the live cron configuration was removed.
