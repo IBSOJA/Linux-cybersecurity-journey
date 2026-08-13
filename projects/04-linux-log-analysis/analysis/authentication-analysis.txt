@@ -1,0 +1,108 @@
+PROJECT 04 — LINUX LOG ANALYSIS
+Authentication Analysis
+
+Investigation Scope
+-------------------
+This analysis examines SSH authentication events recorded in
+`/var/log/auth.log` on the Ubuntu 24.04.3 LTS laboratory system.
+
+Environment
+-----------
+Host: Ubuntu
+User: vboxuser
+SSH service: OpenSSH
+SSH port: 22
+
+Confirmed Failed Authentication Events
+---------------------------------------
+1. 2026-08-12T22:51:04.451874+00:00
+   User: vboxuser
+   Source: ::1
+   Source port: 35916
+
+2. 2026-08-12T23:43:45.735548+00:00
+   User: vboxuser
+   Source: ::1
+   Source port: 44466
+
+3. 2026-08-12T23:44:21.250733+00:00
+   User: vboxuser
+   Source: ::1
+   Source port: 57414
+
+4. 2026-08-12T23:44:26.336097+00:00
+   User: vboxuser
+   Source: ::1
+   Source port: 57414
+
+5. 2026-08-12T23:48:06.342529+00:00
+   User: vboxuser
+   Source: ::1
+   Source port: 39798
+
+6. 2026-08-12T23:48:14.395086+00:00
+   User: vboxuser
+   Source: ::1
+   Source port: 39798
+
+Summary
+-------
+A total of six failed SSH password authentication events were identified.
+
+All six events targeted the vboxuser account and originated from the
+IPv6 loopback address ::1, indicating that the activity originated
+from the local Ubuntu system.
+
+The events occurred between 22:51:04 and 23:48:14.
+
+Two pairs of failures occurred within short intervals:
+- 23:44:21 and 23:44:26
+- 23:48:06 and 23:48:14
+
+Assessment
+----------
+The events are classified as benign laboratory activity because the
+authentication failures were intentionally generated during this
+security investigation exercise.
+
+The evidence demonstrates how repeated SSH authentication failures
+can be identified, filtered, counted, and correlated using Linux
+command-line tools.
+
+False Positive Handling
+-----------------------
+Initial searches using broad grep patterns produced false positives
+because the search terms appeared inside previously executed grep
+commands that were themselves recorded by sudo in auth.log.
+
+The investigation was improved by using the more precise pattern:
+
+sshd\[[0-9]+\]: Failed password
+
+This isolated genuine SSH failed-password events.
+
+
+Successful Authentication Correlation
+--------------------------------------
+A successful SSH authentication event was observed shortly after
+the first failed authentication attempt:
+
+Failed authentication:
+2026-08-12T22:51:04.451874+00:00
+User: vboxuser
+Source: ::1
+Source port: 35916
+
+Successful authentication:
+2026-08-12T22:51:32.219800+00:00
+User: vboxuser
+Source: ::1
+Source port: 35916
+
+The successful authentication occurred approximately 28 seconds
+after the failed authentication and used the same username, source
+address, and source port. These characteristics indicate that the
+events were associated with the same SSH connection attempt.
+
+Because the authentication activity was intentionally generated
+during this laboratory exercise, the events are considered benign.
