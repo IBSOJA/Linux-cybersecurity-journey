@@ -1,0 +1,237 @@
+PROJECT 05 — LINUX NETWORK SECURITY INVESTIGATION
+Network Analysis
+
+Investigation Scope
+-------------------
+This analysis examines the network configuration, listening services,
+active connections, exposed ports, SSH configuration, and firewall
+status of the Ubuntu 24.04.3 LTS laboratory system.
+
+Environment
+-----------
+Host: Ubuntu
+Interface: enp0s3
+IPv4 address: 10.0.2.15/24
+Default gateway: 10.0.2.2
+Network: VirtualBox NAT
+SSH service: OpenSSH
+SSH port: 22
+
+
+1. Network Interface Investigation
+----------------------------------
+The primary network interface was identified as enp0s3.
+
+IPv4 configuration:
+10.0.2.15/24
+
+The loopback interface was also present:
+
+IPv4: 127.0.0.1/8
+IPv6: ::1/128
+
+
+2. Routing Investigation
+------------------------
+The routing table identified:
+
+Default gateway:
+10.0.2.2 via enp0s3
+
+Local network:
+10.0.2.0/24 via enp0s3
+
+The gateway is consistent with the VirtualBox NAT network used by
+the laboratory virtual machine.
+
+
+3. Neighbor Investigation
+-------------------------
+The neighbor table identified the VirtualBox gateway:
+
+10.0.2.2
+MAC address: 52:55:0a:00:02:02
+
+An IPv6 router entry was also observed:
+
+fe80::2
+MAC address: 52:56:00:00:00:02
+
+
+4. Listening Service Investigation
+----------------------------------
+The listening socket investigation identified the following TCP
+services:
+
+TCP port 22:
+Process: sshd
+Binding: 0.0.0.0:22 and [::]:22
+
+TCP port 631:
+Process: cupsd
+Binding: 127.0.0.1:631 and [::1]:631
+
+TCP port 53:
+Process: systemd-resolve
+Binding: 127.0.0.54:53 and 127.0.0.53:53
+
+UDP services included DNS resolver and Avahi-related sockets.
+
+
+5. Active Connection Investigation
+-----------------------------------
+The active connection investigation identified a DHCP-related UDP
+connection:
+
+Local:
+10.0.2.15:68
+
+Remote:
+10.0.2.2:67
+
+Process:
+NetworkManager
+
+No suspicious established TCP connections were observed during the
+investigation.
+
+
+6. Nmap Port Investigation
+--------------------------
+A scan of the local loopback address identified:
+
+22/tcp open ssh
+631/tcp open ipp
+
+A scan of the network interface address 10.0.2.15 identified:
+
+22/tcp open ssh
+
+The scan showed that port 22 was the primary network-exposed TCP
+service among the default ports scanned.
+
+
+7. Service Version Detection
+----------------------------
+Nmap service detection identified:
+
+Port: 22/tcp
+Service: ssh
+Software: OpenSSH 9.6p1 Ubuntu 3ubuntu13.18
+
+The detected service was identified as running on Linux.
+
+
+8. SSH Configuration Investigation
+-----------------------------------
+The effective SSH configuration showed:
+
+PermitRootLogin: without-password
+PubkeyAuthentication: yes
+PasswordAuthentication: yes
+KbdInteractiveAuthentication: no
+
+Password authentication was therefore enabled.
+
+Public-key authentication was also enabled.
+
+The SSH service was listening on all IPv4 and IPv6 interfaces:
+
+0.0.0.0:22
+[::]:22
+
+
+9. Firewall Investigation
+-------------------------
+UFW status:
+
+inactive
+
+The nftables ruleset produced no displayed rules during the
+investigation.
+
+The checks performed did not display any active nftables rules.
+UFW was also reported as inactive.
+
+
+10. UDP Investigation
+---------------------
+A UDP scan of the top 20 ports on 10.0.2.15 was performed.
+
+All scanned UDP ports were reported as closed.
+
+No open UDP service was identified by this scan.
+
+
+11. SSH Network Connectivity Test
+----------------------------------
+An SSH connection was performed against:
+
+10.0.2.15:22
+
+The connection was successfully established.
+
+Authentication was completed using password authentication.
+
+The SSH debug output confirmed:
+
+Connection established
+Remote protocol version: SSH protocol 2.0
+Remote software: OpenSSH 9.6p1 Ubuntu
+Authenticated using password
+
+
+12. Network Exposure Assessment
+------------------------------
+SSH represents the primary network-exposed service identified during
+the investigation.
+
+The service is bound to all IPv4 and IPv6 interfaces rather than
+only the loopback interface.
+
+CUPS, in contrast, is bound only to:
+
+127.0.0.1:631
+[::1]:631
+
+Therefore, CUPS is locally restricted while SSH is network reachable.
+
+The presence of an open SSH port is not itself evidence of malicious
+activity. The security significance depends on whether the service is
+required, who can reach it, and how authentication and access controls
+are configured.
+
+
+13. Security Assessment
+-----------------------
+No evidence of an active compromise was identified during this
+network investigation.
+
+However, the following configuration considerations were identified:
+
+- SSH is exposed on all network interfaces.
+- Password authentication is enabled.
+- UFW is inactive.
+- No nftables rules were displayed.
+- SSH is therefore an important service to protect in a production
+  environment.
+
+Recommended production considerations include restricting SSH access
+to trusted networks, preferring strong key-based authentication,
+reviewing password authentication requirements, and implementing
+appropriate host firewall controls.
+
+
+Conclusion
+----------
+The investigation demonstrated how Linux networking commands,
+socket inspection, Nmap scanning, SSH configuration analysis, and
+firewall checks can be combined to assess a system's network security
+posture.
+
+The investigation identified SSH as the primary network-exposed
+service while CUPS remained restricted to the local system.
+
+The findings represent security configuration observations and do
+not, by themselves, indicate that the laboratory system was
+compromised.

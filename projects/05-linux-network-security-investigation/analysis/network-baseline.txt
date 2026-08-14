@@ -1,0 +1,63 @@
+PROJECT 05 — LINUX NETWORK SECURITY INVESTIGATION
+Network Baseline
+
+Network Interface
+-----------------
+Primary interface: enp0s3
+IPv4 address: 10.0.2.15/24
+Default gateway: 10.0.2.2
+Loopback IPv4: 127.0.0.1
+Loopback IPv6: ::1
+
+Listening Services
+------------------
+TCP 22:
+Service: sshd
+Binding: 0.0.0.0 and [::]
+Assessment: SSH service listening on all IPv4 and IPv6 interfaces.
+
+TCP 53:
+Service: systemd-resolve
+Binding: 127.0.0.54 and 127.0.0.53
+Assessment: Local DNS resolver.
+
+TCP 631:
+Service: cupsd
+Binding: 127.0.0.1 and [::1]
+Assessment: Local printing service.
+
+UDP 5353:
+Service: avahi-daemon
+Assessment: Multicast DNS/service discovery.
+
+UDP 54005:
+Service: avahi-daemon
+Assessment: Avahi service.
+
+UDP 46052:
+Service: avahi-daemon
+Assessment: Avahi IPv6 service.
+
+Active Network Activity
+-----------------------
+The system showed DHCP communication:
+
+Local: 10.0.2.15:68
+Remote: 10.0.2.2:67
+
+This communication is consistent with DHCP activity
+between the Ubuntu VM and the VirtualBox NAT gateway.
+
+Initial Security Assessment
+---------------------------
+SSH is listening on port 22 on all IPv4 and IPv6 interfaces.
+
+The other identified services are either bound to localhost
+or associated with normal Ubuntu service-discovery functionality.
+
+No clearly suspicious established TCP connection was identified
+during this baseline inspection.
+
+Further investigation will determine which services are reachable
+from the network and whether any unexpected ports or services are
+present.

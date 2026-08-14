@@ -1,0 +1,99 @@
+PROJECT 05 — LINUX NETWORK SECURITY INVESTIGATION
+SSH Security Configuration
+
+Investigation Area
+------------------
+Effective SSH authentication configuration was examined to assess
+the security posture of the network-reachable SSH service.
+
+Command Used
+------------
+`sudo sshd -T | grep -E '^(passwordauthentication|pubkeyauthentication|permitrootlogin|kbdinteractiveauthentication)'`
+
+Effective Configuration
+-----------------------
+permitrootlogin without-password
+pubkeyauthentication yes
+passwordauthentication yes
+kbdinteractiveauthentication no
+
+Assessment
+----------
+Password authentication is enabled.
+
+This is consistent with the controlled authentication events
+observed earlier in the Linux log analysis project, where successful
+and failed password-based SSH authentication events were recorded.
+
+Public-key authentication is also enabled.
+
+Root password authentication is not permitted because
+permitrootlogin is configured as without-password.
+
+Keyboard-interactive authentication is disabled.
+
+Security Significance
+---------------------
+The SSH service is network-reachable on TCP port 22 and permits
+password authentication.
+
+In a real environment, network-reachable password authentication
+should be reviewed carefully because repeated password failures
+can be associated with password-guessing or brute-force activity.
+
+The presence of password authentication does not by itself indicate
+a vulnerability or malicious activity. Security assessment must
+consider the authentication policy, account protections, network
+controls, and observed activity together.
+
+No configuration changes were made during this investigation.
+
+
+Firewall Assessment
+-------------------
+UFW was checked using:
+
+sudo ufw status verbose
+
+Result:
+
+Status: inactive
+
+UFW is not currently active on the laboratory system.
+
+Security Significance
+---------------------
+Because UFW is inactive, UFW is not currently providing host-level
+network filtering for the system.
+
+This finding should not automatically be interpreted as meaning
+that no firewall rules exist, because other Linux firewall mechanisms
+may be configured independently of UFW.
+
+The network-reachable SSH service should therefore be assessed
+alongside the system's actual packet-filtering configuration.
+
+
+Underlying Firewall Rules
+-------------------------
+The active nftables ruleset was checked using:
+
+sudo nft list ruleset
+
+The command returned no rules.
+
+Combined Firewall Assessment
+----------------------------
+UFW is inactive and no active nftables rules were displayed.
+
+Therefore, no active host-level UFW or nftables filtering policy
+was identified during this investigation.
+
+The SSH service remains network-reachable on TCP port 22.
+
+This finding does not establish that the system is directly exposed
+to the public Internet. The laboratory VM uses VirtualBox networking,
+which provides a separate network boundary.
+
+The finding is therefore classified as a security configuration
+observation rather than evidence of malicious activity.

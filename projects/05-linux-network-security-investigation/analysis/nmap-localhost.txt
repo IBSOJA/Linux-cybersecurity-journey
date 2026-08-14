@@ -1,0 +1,172 @@
+PROJECT 05 — LINUX NETWORK SECURITY INVESTIGATION
+Nmap Localhost Scan
+
+Scan Target
+-----------
+127.0.0.1 (localhost)
+
+Nmap Version
+------------
+7.94SVN
+
+Scan Type
+---------
+Default TCP port scan
+
+Command
+-------
+nmap 127.0.0.1
+
+Results
+-------
+22/tcp  open  ssh
+631/tcp open  ipp
+
+998 TCP ports were reported as closed.
+
+Port 22 — SSH
+-------------
+SSH was identified as an open TCP service.
+
+This finding is consistent with the previous `ss` investigation,
+which showed sshd listening on 0.0.0.0:22 and [::]:22.
+
+Port 631 — IPP
+--------------
+Port 631 was identified as an open TCP service.
+
+This finding is consistent with the previous `ss` investigation,
+which showed cupsd listening on 127.0.0.1:631 and [::1]:631.
+
+Initial Security Assessment
+---------------------------
+The Nmap localhost scan confirmed that SSH and the local printing
+service were reachable through the loopback interface.
+
+SSH requires further investigation because it is bound to all IPv4
+and IPv6 interfaces according to the previous socket investigation.
+
+CUPS appears to be restricted to localhost based on the socket
+bindings observed with `ss`.
+
+Important Limitation
+--------------------
+This was a localhost scan using Nmap's default TCP port range.
+It does not establish whether UDP services are reachable from
+other hosts and does not scan every possible TCP port.
+
+
+Network Interface Scan
+----------------------
+A second Nmap scan was performed against the VM's network address:
+
+Command:
+nmap 10.0.2.15
+
+Result:
+22/tcp open ssh
+
+999 TCP ports were reported as closed.
+
+Comparison with Localhost Scan
+------------------------------
+The localhost scan identified two open TCP ports:
+
+22/tcp — SSH
+631/tcp — IPP
+
+The network-interface scan identified only:
+
+22/tcp — SSH
+
+This difference is consistent with the socket bindings observed
+during the initial `ss` investigation.
+
+SSH was listening on 0.0.0.0:22 and [::]:22, allowing it to be
+reachable through the VM's network interface.
+
+CUPS was listening only on 127.0.0.1:631 and [::1]:631, which
+restricted the service to the local system.
+
+Security Significance
+---------------------
+The investigation confirmed that SSH is network-reachable through
+the VM's 10.0.2.15 interface.
+
+This does not by itself indicate malicious activity. However,
+network-reachable services should be reviewed to ensure that they
+are intentionally enabled, properly configured, and appropriately
+protected.
+
+
+Service Version Detection
+-------------------------
+A service and version detection scan was performed against the
+VM's network address.
+
+Command:
+nmap -sV 10.0.2.15
+
+Result:
+22/tcp open ssh OpenSSH 9.6p1 Ubuntu 3ubuntu13.18
+Ubuntu Linux; protocol 2.0
+
+Service Information
+-------------------
+Service: SSH
+Software: OpenSSH
+Version: 9.6p1
+Ubuntu package revision: 3ubuntu13.18
+Protocol: SSH protocol 2.0
+Operating system family: Linux
+
+Security Assessment
+-------------------
+The SSH service is network-reachable and has been identified as
+OpenSSH 9.6p1 on Ubuntu.
+
+Version identification provides useful information for security
+assessment, but the version alone does not establish that the
+service is vulnerable.
+
+Further investigation should consider the service configuration,
+authentication settings, and whether the exposed service is
+intentionally required.
+
+
+UDP Investigation
+-----------------
+A UDP scan was performed against the VM's network address using
+the 20 most common UDP ports.
+
+Command:
+
+sudo nmap -sU --top-ports 20 10.0.2.15
+
+Result:
+
+All 20 scanned UDP ports were reported as closed.
+
+No open UDP service was identified among the common UDP ports
+tested.
+
+Comparison With Socket Investigation
+-------------------------------------
+The earlier `ss` investigation showed several UDP sockets,
+including ports 5353, 54005, and 46052.
+
+These ports were not included in Nmap's top-20 UDP scan.
+
+Therefore, the UDP scan does not establish that no UDP services
+exist on the system.
+
+It establishes only that no open UDP ports were identified among
+the 20 common UDP ports scanned against 10.0.2.15.
+
+Security Assessment
+-------------------
+No unexpected open UDP service was identified within the scope
+of this scan.
+
+A complete UDP assessment would require a broader UDP scan and
+additional service-specific investigation.
