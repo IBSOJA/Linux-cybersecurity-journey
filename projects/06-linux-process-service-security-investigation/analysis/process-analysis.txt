@@ -1,0 +1,90 @@
+Process Investigation Analysis
+
+Objective
+The purpose of this analysis was to examine running Linux processes, identify their owners and executable paths, and determine whether the observed processes appeared consistent with the expected Ubuntu desktop environment.
+
+Process Overview
+
+The `ps` command showed the current shell and the `ps` command itself:
+
+- PID 2994 — bash
+- PID 5454 — ps
+
+The broader `ps -ef` investigation showed normal system, desktop, networking, logging, security, and VirtualBox-related processes.
+
+Examples included:
+
+- PID 1 — /sbin/init splash
+- systemd-journald
+- systemd-udevd
+- systemd-resolved
+- NetworkManager
+- rsyslogd
+- cron
+- sshd
+- cupsd
+- gdm3
+- gnome-shell
+- snapd
+- unattended-upgrades
+- VBoxService
+- VBoxDRMClient
+
+The presence of kernel threads displayed in square brackets was also observed. These are expected components of the Linux operating system and were not treated as suspicious based solely on their naming or presentation.
+
+Process Ownership and Relationships
+
+Individual processes were examined to determine their ownership, parent process, and executable command.
+
+SSH daemon:
+
+PID 4260
+Owner: root
+Parent PID: 1
+Command:
+`/usr/sbin/sshd -D [listener] 0 of 10-100 startups`
+
+This process was consistent with the SSH service identified during the investigation. It was running as root and was managed under the system process hierarchy.
+
+CUPS daemon:
+
+PID 5187
+Owner: root
+Parent PID: 1
+Command:
+`/usr/sbin/cupsd -l`
+
+This process was consistent with the CUPS printing service. Its ownership and parent-child relationship were consistent with a system-managed service.
+
+GNOME Shell:
+
+PID 2247
+Owner: vboxuser
+Parent PID: 1989
+Command:
+`/usr/bin/gnome-shell`
+
+This process was associated with the graphical desktop session of the logged-in user. Its ownership and parent process were consistent with an expected user-session process.
+
+Process Assessment
+
+The examined processes had expected ownership, executable paths, and parent-child relationships.
+
+No clearly suspicious process was identified during the process investigation.
+
+The investigation did not identify evidence of:
+
+- An unknown executable running from an unusual location.
+- An unexpected process running under an inappropriate user.
+- An obviously suspicious parent-child relationship.
+- A clearly abnormal system process based on the checks performed.
+
+However, process names alone are not sufficient to determine whether a process is malicious. A more comprehensive investigation would correlate process information with file integrity, network connections, authentication activity, persistence mechanisms, installed software, and other host-based evidence.
+
+Conclusion
+
+The observed process environment was consistent with the expected Ubuntu desktop and VirtualBox environment.
+
+The SSH and CUPS daemons were associated with their expected system services, while GNOME Shell was associated with the user's graphical session.
+
+No directly suspicious process was identified during this point-in-time investigation.

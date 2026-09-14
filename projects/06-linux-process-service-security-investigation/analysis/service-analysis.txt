@@ -1,0 +1,156 @@
+Service Investigation Analysis
+
+Objective
+
+The purpose of this investigation was to examine running Linux services, identify security-relevant services, determine their current states, and correlate service configuration with processes, network listeners, and firewall status.
+
+Service Overview
+
+The investigation used systemd to identify currently running services.
+
+A total of 30 running service units were observed during the investigation.
+
+Examples included:
+
+- accounts-daemon.service
+- avahi-daemon.service
+- cron.service
+- cups.service
+- dbus.service
+- gdm.service
+- NetworkManager.service
+- rsyslog.service
+- snapd.service
+- systemd-journald.service
+- systemd-resolved.service
+- systemd-udevd.service
+- unattended-upgrades.service
+- vboxadd-service.service
+- wpa_supplicant.service
+
+The observed services were consistent with the Ubuntu desktop and VirtualBox environment.
+
+SSH Service Investigation
+
+The OpenSSH service was examined because SSH provides remote access and is security-relevant.
+
+The command:
+
+systemctl status ssh --no-pager
+
+showed:
+
+- ssh.service — loaded
+- Active state — inactive (dead)
+- ssh.service — disabled
+- Triggered by — ssh.socket
+
+The SSH socket was then examined.
+
+The command:
+
+systemctl status ssh.socket --no-pager
+
+showed that ssh.socket was:
+
+- loaded
+- enabled
+- active (listening)
+- listening on 0.0.0.0:22
+- listening on [::]:22
+
+The ssh.socket configuration confirmed:
+
+- ListenStream=0.0.0.0:22
+- ListenStream=[::]:22
+- Accept=no
+- The socket is enabled through sockets.target
+- The socket can trigger ssh.service
+
+This indicates that SSH is configured using systemd socket activation.
+
+Network Correlation
+
+The network investigation identified the primary IPv4 address of the Ubuntu virtual machine as:
+
+10.0.2.15/24
+
+The default gateway was:
+
+10.0.2.2
+
+The network configuration was consistent with a VirtualBox NAT environment.
+
+The command:
+
+sudo ss -lntp | grep ':22'
+
+confirmed that TCP port 22 was listening on both IPv4 and IPv6:
+
+- 0.0.0.0:22
+- [::]:22
+
+The socket was associated with systemd PID 1 rather than an already-running sshd process.
+
+This finding was consistent with the observed systemd socket activation configuration.
+
+Firewall Assessment
+
+The command:
+
+sudo ufw status verbose
+
+reported:
+
+Status: inactive
+
+Therefore, UFW was not providing host-level firewall filtering at the time of the investigation.
+
+The absence of an active UFW firewall does not by itself prove that the SSH service is externally accessible. The virtual machine's network mode, routing, and other network controls also affect actual reachability.
+
+Other Network Services
+
+The investigation also identified several other listening services.
+
+systemd-resolved was listening on local DNS resolver addresses:
+
+- 127.0.0.54:53
+- 127.0.0.53:53
+
+CUPS was listening only on localhost:
+
+- 127.0.0.1:631
+- [::1]:631
+
+Avahi was listening on mDNS port 5353 on IPv4 and IPv6 interfaces.
+
+These services were associated with expected Ubuntu desktop functionality.
+
+Security Assessment
+
+The investigation did not identify an obviously unauthorized or malicious service.
+
+However, several security-relevant observations were identified:
+
+- SSH is enabled through socket activation.
+- SSH is listening on all IPv4 and IPv6 interfaces.
+- TCP port 22 is therefore exposed at the VM interface level.
+- UFW is currently inactive.
+- The VM is using a 10.0.2.0/24 network consistent with VirtualBox NAT.
+- CUPS is restricted to localhost based on its observed listening addresses.
+
+The combination of a network-listening SSH socket and an inactive host firewall should be considered during system hardening.
+
+The presence of a listening port does not automatically mean that the service is reachable from the public Internet. Actual exposure depends on the VM networking configuration and other network controls.
+
+Conclusion
+
+The observed services were generally consistent with the expected Ubuntu desktop and VirtualBox environment.
+
+The SSH investigation demonstrated systemd socket activation, with ssh.socket actively listening on TCP port 22 while ssh.service remained inactive until triggered.
+
+No clearly unauthorized service was identified during the investigation.
+
+The most significant hardening observation was that SSH listens on all interfaces while UFW is inactive. This configuration should be reviewed according to the intended use of the system and its network exposure.
+
+Further investigation could include VirtualBox network configuration, firewall configuration, SSH configuration, authentication logs, and remote connection testing.
