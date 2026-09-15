@@ -1,0 +1,60 @@
+Project 07 — Linux Security Hardening Lab
+Baseline User and Privilege Assessment
+
+System User:
+vboxuser
+
+Current User Identity:
+uid=1000(vboxuser) gid=1000(vboxuser) groups=1000(vboxuser),27(sudo),986(vboxsf)
+
+UID 0 Accounts:
+root:0
+
+Sudo Group:
+sudo:x:27:vboxuser
+
+Human/User Accounts:
+
+vboxuser
+UID: 1000
+Home: /home/vboxuser
+Shell: /bin/bash
+Groups: vboxuser, sudo, vboxsf
+Password Status: P (password usable)
+Last Login: Mon Aug 17 13:17:12 +0000 2026
+
+bob
+UID: 1002
+Home: /home/bob
+Shell: /bin/sh
+Groups: bob, Developers
+Password Status: L (locked)
+Last Login: Never logged in
+
+A
+UID: 1003
+Home: /home/A
+Shell: /bin/sh
+Groups: A
+Password Status: L (locked)
+Last Login: Never logged in
+
+Alice
+UID: 1004
+Home: /home/Alice
+Shell: /bin/sh
+Groups: Alice, Developers
+Password Status: L (locked)
+Last Login: Never logged in
+
+Initial Assessment:
+
+Only root has UID 0.
+
+vboxuser is the only account identified as a member of the sudo group.
+
+bob, A, and Alice are not members of the sudo group.
+
+bob, A, and Alice have locked passwords and have never logged in according to lastlog.
+
+No account was modified or removed during the baseline assessment.

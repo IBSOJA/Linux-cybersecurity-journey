@@ -1,0 +1,76 @@
+Project 07 — Linux Security Hardening Lab
+Baseline Firewall Assessment
+
+UFW Status
+----------
+
+UFW status:
+
+Status: inactive
+
+The UFW firewall is not currently active.
+
+UFW Systemd Unit
+----------------
+
+Service: ufw.service
+State: active (exited)
+Enabled: enabled
+Exit status: 0/SUCCESS
+
+The UFW systemd unit is enabled and has completed its
+startup action, but this does not mean that the firewall
+is currently enforcing filtering rules.
+
+UFW Raw Firewall State
+----------------------
+
+The IPv4 firewall chains reported ACCEPT policies:
+
+INPUT: ACCEPT
+FORWARD: ACCEPT
+OUTPUT: ACCEPT
+
+The IPv4 NAT-related chains were also present with ACCEPT
+policies and no filtering rules.
+
+The IPv6 firewall chains reported ACCEPT policies:
+
+INPUT: ACCEPT
+FORWARD: ACCEPT
+OUTPUT: ACCEPT
+
+No restrictive firewall rules were observed.
+
+nftables State
+--------------
+
+The nftables ruleset reported:
+
+table ip filter {
+}
+
+table ip6 filter {
+}
+
+No active filtering rules were observed in these tables.
+
+Assessment
+----------
+
+The host currently has no active restrictive UFW firewall
+policy.
+
+The UFW service/unit is enabled, but the UFW firewall itself
+is inactive.
+
+The observed nftables filter tables contain no rules.
+
+The current baseline therefore represents a permissive
+firewall state in which traffic is not being restricted by
+an active host firewall policy.
+
+This is a significant hardening opportunity.
+
+No firewall rules were changed during the baseline
+assessment.

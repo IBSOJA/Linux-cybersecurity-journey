@@ -1,0 +1,62 @@
+Project 07 — Linux Security Hardening Lab
+Baseline AppArmor Assessment
+
+AppArmor Module
+---------------
+
+AppArmor kernel module:
+Loaded
+
+AppArmor Profiles
+-----------------
+
+Total profiles loaded: 159
+
+Profiles in enforce mode: 62
+Profiles in complain mode: 5
+Profiles in prompt mode: 0
+Profiles in kill mode: 0
+Profiles in unconfined mode: 92
+
+Active Processes with AppArmor Profiles
+----------------------------------------
+
+Processes with profiles defined: 4
+
+Processes in enforce mode: 3
+
+Observed enforced processes included:
+
+cups-browsed
+cupsd
+rsyslogd
+
+One process was reported as unconfined despite having a
+defined profile.
+
+AppArmor Service
+----------------
+
+Service: apparmor.service
+State: active (exited)
+Enabled: enabled
+Exit status: 0/SUCCESS
+
+Assessment
+----------
+
+AppArmor is loaded, enabled, and providing mandatory access
+control for multiple applications and system services.
+
+62 profiles are currently enforcing restrictions.
+
+Five profiles are in complain mode and 92 profiles are
+reported as unconfined.
+
+The presence of unconfined profiles does not by itself
+indicate a security failure. Profiles should only be changed
+after determining whether enforcement is appropriate for the
+specific application.
+
+No AppArmor profiles were modified during the baseline
+assessment.

@@ -1,0 +1,156 @@
+Project 07 — Linux Security Hardening Lab
+Baseline Services Assessment
+
+Running Services
+----------------
+
+30 service units were reported as active and running.
+
+No failed systemd service units were reported.
+
+Failed Services
+---------------
+
+systemctl --failed reported:
+
+0 loaded units listed.
+
+Enabled Services
+----------------
+
+57 service unit files were reported as enabled.
+
+An enabled service is not necessarily currently running.
+
+Security Services
+-----------------
+
+AppArmor:
+Active
+Enabled
+
+UFW:
+Systemd service/unit: active and enabled
+UFW firewall status: inactive
+
+The UFW service being active does not mean that firewall
+rules are currently being enforced. The UFW status command
+reported the firewall as inactive.
+
+SSH
+---
+
+ssh.socket:
+Enabled
+
+ssh.service:
+Disabled
+
+The system uses SSH socket activation. ssh.socket listens
+for incoming connections and triggers ssh.service.
+
+Remote Access
+-------------
+
+gnome-remote-desktop:
+Active
+Enabled
+
+This service provides remote desktop functionality and
+should be reviewed during the hardening phase if remote
+desktop access is not required.
+
+Network Discovery
+-----------------
+
+avahi-daemon:
+Active
+Enabled
+
+Avahi provides multicast DNS/DNS-SD service discovery and
+is listening on UDP port 5353 on IPv4 and IPv6.
+
+Printing
+--------
+
+cups:
+Active
+Enabled
+
+cups-browsed:
+Active
+Enabled
+
+CUPS is listening only on localhost:
+
+127.0.0.1:631
+[::1]:631
+
+This means the observed CUPS listener is not bound to all
+network interfaces.
+
+Bluetooth and Modem Services
+----------------------------
+
+bluetooth:
+Inactive
+Enabled
+
+ModemManager:
+Active
+Enabled
+
+VirtualBox Integration
+----------------------
+
+vboxadd-service:
+Active
+Enabled
+
+This is expected in the VirtualBox environment.
+
+Network Listening Services
+---------------------------
+
+Observed listening services include:
+
+TCP 22:
+0.0.0.0:22
+[::]:22
+Owned by systemd and associated with ssh.socket.
+
+DNS:
+127.0.0.53:53
+127.0.0.54:53
+Provided by systemd-resolved and bound to local addresses.
+
+Avahi:
+0.0.0.0:5353
+[::]:5353
+Provided by avahi-daemon.
+
+CUPS:
+127.0.0.1:631
+[::1]:631
+Provided by cupsd and bound to localhost.
+
+Initial Assessment
+------------------
+
+No failed services were detected.
+
+AppArmor is active and enabled.
+
+The UFW firewall is currently inactive even though its
+systemd service/unit is enabled.
+
+Several services provide additional functionality that may
+increase the system attack surface, including GNOME Remote
+Desktop, Avahi, CUPS/CUPS-browsed, and ModemManager.
+
+These services were not disabled during the baseline
+assessment. Their necessity will be evaluated before any
+hardening changes are made.
+
+No service configuration was changed during the baseline
+assessment.

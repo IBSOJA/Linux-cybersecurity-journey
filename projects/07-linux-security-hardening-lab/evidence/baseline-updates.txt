@@ -1,0 +1,66 @@
+Project 07 — Linux Security Hardening Lab
+Baseline Update and Patch Assessment
+
+Package Repository Status
+------------------------
+
+The configured Ubuntu package repositories were reachable
+successfully during the baseline assessment.
+
+Repositories contacted successfully included:
+
+noble
+noble-updates
+noble-security
+noble-backports
+
+Available Package Updates
+-------------------------
+
+151 packages were reported as available for upgrade.
+
+The available updates include security-relevant system
+components such as AppArmor, Linux kernel packages,
+Linux firmware, Python libraries, networking components,
+and other core system packages.
+
+Kernel Update
+-------------
+
+The currently running kernel is:
+
+7.0.0-30-generic
+
+A newer kernel package is available:
+
+7.0.0-31-generic
+
+Automatic Updates
+-----------------
+
+unattended-upgrades.service:
+
+State: active (running)
+Enabled: enabled
+
+The unattended-upgrades configuration file is present:
+
+/etc/apt/apt.conf.d/50unattended-upgrades
+
+Assessment
+----------
+
+The system has functioning package repositories and an
+enabled/running unattended-upgrades service.
+
+However, 151 package upgrades are currently available,
+including a newer kernel.
+
+Therefore, the system is not fully up to date at the time
+of the baseline assessment.
+
+No package upgrades were installed during the baseline
+assessment.
+
+No update-related configuration was changed during the
+baseline assessment.

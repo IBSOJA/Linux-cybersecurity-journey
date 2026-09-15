@@ -1,0 +1,80 @@
+Project 07 — Linux Security Hardening Lab
+Baseline Permissions Assessment
+
+Sensitive System Files
+----------------------
+
+/etc/passwd
+Permissions: 644
+Owner: root:root
+Assessment: Normal system-readable account database.
+
+/etc/group
+Permissions: 644
+Owner: root:root
+Assessment: Normal system-readable group database.
+
+/etc/shadow
+Permissions: 640
+Owner: root:shadow
+Assessment: Restricted. Only root has write access and the
+shadow group has read access.
+
+/etc/gshadow
+Permissions: 640
+Owner: root:shadow
+Assessment: Restricted. Only root has write access and the
+shadow group has read access.
+
+Home Directory Permissions
+--------------------------
+
+/home
+Permissions: 755
+Owner: root:root
+
+/home/vboxuser
+Permissions: 750
+Owner: vboxuser:vboxuser
+
+/home/bob
+Permissions: 750
+Owner: bob:bob
+
+Account Home Directory Investigation
+------------------------------------
+
+The accounts A and Alice have the following home directory
+paths recorded in /etc/passwd:
+
+A: /home/A
+Alice: /home/Alice
+
+Neither /home/A nor /home/Alice currently exists.
+
+A and Alice have locked passwords and have never logged in
+according to the baseline user assessment.
+
+A search of /home found no files owned by A or Alice.
+
+Developer Group
+---------------
+
+Developers:x:1005:Alice,bob
+
+Alice and bob are members of the Developers group.
+
+Assessment
+----------
+
+The permissions of the primary account database files are
+appropriately restricted for the current baseline.
+
+The /etc/shadow and /etc/gshadow files are not world-readable.
+
+The existing user home directories have restrictive 750
+permissions, preventing access by users outside the owner
+and group.
+
+No permission changes were made during the baseline
+assessment.

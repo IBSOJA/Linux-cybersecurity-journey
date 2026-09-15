@@ -1,0 +1,79 @@
+Project 07 — Linux Security Hardening Lab
+Baseline SSH Assessment
+
+SSH Service State
+-----------------
+Service: ssh.service
+State: inactive (dead)
+Enabled: disabled
+Trigger: ssh.socket
+
+SSH Socket State
+----------------
+Socket: ssh.socket
+State: active (listening)
+Enabled: enabled
+Listening addresses:
+0.0.0.0:22
+[::]:22
+
+Port 22 Listener
+----------------
+Port 22 is listening on IPv4 and IPv6.
+The listener is owned by systemd (PID 1).
+
+SSH Socket Activation
+---------------------
+ssh.socket is configured to trigger ssh.service.
+
+Runtime Directory
+-----------------
+ssh.service defines:
+
+RuntimeDirectory=sshd
+RuntimeDirectoryMode=0755
+
+The /run/sshd directory is not currently present because
+ssh.service is inactive.
+
+SSH Configuration Validation
+-----------------------------
+The following commands were attempted:
+
+sudo sshd -T
+sudo sshd -t
+
+Both returned:
+
+Missing privilege separation directory: /run/sshd
+
+This prevents effective SSH configuration inspection and
+configuration validation while ssh.service is inactive.
+
+Systemd Configuration Evidence
+------------------------------
+ssh.service uses:
+
+ExecStartPre=/usr/sbin/sshd -t
+RuntimeDirectory=sshd
+RuntimeDirectoryMode=0755
+
+ssh.socket reports:
+
+Listen=0.0.0.0:22
+Listen=[::]:22
+Triggers=ssh.service
+
+Assessment
+----------
+The system is using systemd socket activation for SSH.
+
+The SSH socket is active and listening on port 22 while
+ssh.service is currently inactive.
+
+The absence of /run/sshd is consistent with the inactive
+ssh.service because systemd is configured to create the
+runtime directory when the service starts.
+
+No SSH hardening changes were made during the baseline
+assessment.

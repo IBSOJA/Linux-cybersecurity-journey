@@ -1,0 +1,44 @@
+Project 07 — Linux Security Hardening Lab
+Baseline Kernel Security Assessment
+
+Kernel Security Controls
+------------------------
+
+kernel.randomize_va_space = 2
+
+Assessment:
+Full address space layout randomization (ASLR) is enabled.
+
+kernel.dmesg_restrict = 1
+
+Assessment:
+Access to kernel diagnostic information through dmesg is
+restricted.
+
+kernel.kptr_restrict = 1
+
+Assessment:
+Exposure of kernel pointer addresses is restricted.
+
+fs.protected_hardlinks = 1
+
+Assessment:
+Protection against certain hard-link attacks is enabled.
+
+fs.protected_symlinks = 1
+
+Assessment:
+Protection against certain symbolic-link attacks is enabled.
+
+Overall Assessment
+------------------
+
+The inspected kernel and filesystem security controls are
+already configured with protective values.
+
+No changes were required to these controls during the
+baseline assessment.
+
+The values will be retained during the hardening phase
+unless further investigation identifies a specific reason
+for modification.
