@@ -1,0 +1,225 @@
+Project 07 — Linux Security Hardening Lab
+Evidence: ModemManager Hardening
+Date: 2026-09-28
+Host: Ubuntu 24.04.x LTS
+User: vboxuser
+
+1. Objective
+-------------
+Investigate ModemManager to determine whether it is required in the
+current Ubuntu VirtualBox environment, assess its dependencies and
+exposure, temporarily stop it to test system functionality, and
+permanently disable it if safe to do so.
+
+2. Baseline
+-----------
+Initial service status:
+
+ModemManager.service was active/running and enabled.
+
+Main process:
+
+/usr/sbin/ModemManager
+
+The service was running as root and contained several systemd security
+restrictions including:
+
+ProtectSystem=true
+ProtectHome=true
+PrivateTmp=true
+NoNewPrivileges=true
+
+The service was configured to start through:
+
+WantedBy=multi-user.target
+
+It also required polkit.service.
+
+3. Modem Hardware Investigation
+-------------------------------
+Checked for detected modems with:
+
+mmcli -L
+
+Result:
+
+No modems were found
+
+This indicated that no modem device was currently being managed by
+ModemManager.
+
+4. Dependency Investigation
+---------------------------
+Checked reverse dependencies with:
+
+systemctl list-dependencies --reverse ModemManager.service
+
+Result:
+
+ModemManager.service
+└─multi-user.target
+  └─graphical.target
+
+No specific application or system service was identified as requiring
+ModemManager.
+
+The service was started as part of the normal multi-user boot target.
+
+5. Network Exposure Investigation
+---------------------------------
+Checked TCP/UDP listeners:
+
+sudo ss -lntup | grep -i modem
+
+Result:
+No output.
+
+Checked Unix-domain sockets:
+
+sudo ss -lxnp | grep -i ModemManager
+
+Result:
+No output.
+
+No network listener associated with ModemManager was identified.
+
+6. Temporary Stop Test
+----------------------
+Stopped the service temporarily with:
+
+sudo systemctl stop ModemManager.service
+
+Result:
+
+Active: inactive (dead)
+
+The process exited normally with:
+
+code=exited, status=0/SUCCESS
+
+7. System Functionality Verification
+-------------------------------------
+After stopping ModemManager, the following services and functions
+were verified:
+
+NetworkManager:
+active
+
+systemd-resolved:
+active
+
+graphical.target:
+active
+
+ssh.service:
+active
+
+Internet connectivity:
+Successful
+
+NetworkManager device status showed:
+
+DEVICE  TYPE
+enp0s3  ethernet
+lo      loopback
+
+No GSM/mobile-broadband device was present.
+
+8. Permanent Hardening
+----------------------
+Based on the investigation and successful functionality testing,
+ModemManager was permanently disabled with:
+
+sudo systemctl disable ModemManager.service
+
+Systemd removed:
+
+/etc/systemd/system/multi-user.target.wants/ModemManager.service
+/etc/systemd/system/dbus-org.freedesktop.ModemManager1.service
+
+9. Final Verification
+---------------------
+Enablement status:
+
+systemctl is-enabled ModemManager.service
+
+Result:
+
+disabled
+
+Service status:
+
+Active: inactive (dead)
+
+Post-hardening system checks:
+
+NetworkManager:
+active
+
+systemd-resolved:
+active
+
+graphical.target:
+active
+
+ssh.service:
+active
+
+Internet connectivity:
+Successful
+
+Ping test:
+
+3 packets transmitted
+3 packets received
+0% packet loss
+
+10. Final Network Exposure
+--------------------------
+Final listening sockets included:
+
+127.0.0.53:53       systemd-resolved
+127.0.0.54:53       systemd-resolved
+127.0.0.1:631        cupsd
+0.0.0.0:22           sshd
+[::1]:631            cupsd
+[::]:22              sshd
+
+No ModemManager network listener was identified.
+
+11. Security Assessment
+-----------------------
+ModemManager was running with root privileges but no modem hardware
+was detected in the current VirtualBox environment.
+
+No specific service dependency was identified, and no network listener
+associated with ModemManager was observed.
+
+The service was temporarily stopped and the system continued to
+function normally. NetworkManager, DNS resolution, the graphical
+environment, SSH, and Internet connectivity remained operational.
+
+For this specific lab environment, ModemManager was therefore
+permanently disabled as part of service minimization and attack-surface
+reduction.
+
+This decision is environment-specific. If cellular/mobile-broadband
+hardware is later added or required, ModemManager may need to be
+re-enabled.
+
+12. Conclusion
+--------------
+ModemManager was successfully investigated, tested, and permanently
+disabled without affecting the essential system functions tested.
+
+Final state:
+
+Service: disabled
+Runtime state: inactive (dead)
+Modem detected: none
+Network listener: none identified
+NetworkManager: operational
+DNS: operational
+Graphical environment: operational
+SSH: operational
+Internet connectivity: operational

@@ -1,0 +1,92 @@
+Project 07 — Linux Security Hardening Lab
+FIREWALL HARDENING EVIDENCE
+
+Date: 2026-09-17
+
+1. Baseline
+
+Before hardening, UFW was installed but inactive.
+
+Command:
+
+sudo ufw status verbose
+
+Result:
+
+Status: inactive
+
+The underlying firewall policies were accepting incoming,
+forwarded, and outgoing traffic by default.
+
+2. Firewall Configuration
+
+The following default policies were configured:
+
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw default deny routed
+
+This establishes a deny-by-default policy for unsolicited
+incoming traffic while allowing normal outbound connections.
+
+3. SSH Exception
+
+Because SSH was confirmed to be listening on TCP port 22,
+an explicit firewall rule was added before enabling UFW.
+
+Command:
+
+sudo ufw allow 22/tcp
+
+The rule was verified with:
+
+sudo ufw show added
+
+Result:
+
+ufw allow 22/tcp
+
+4. Firewall Activation
+
+Command:
+
+sudo ufw enable
+
+Result:
+
+Firewall is active and enabled on system startup
+
+5. Post-Configuration Verification
+
+Command:
+
+sudo ufw status verbose
+
+Result:
+
+Status: active
+Logging: on (low)
+Default: deny (incoming), allow (outgoing), disabled (routed)
+
+Configured rule:
+
+22/tcp ALLOW IN Anywhere
+22/tcp (v6) ALLOW IN Anywhere (v6)
+
+6. Security Assessment
+
+UFW is now actively enforcing a deny-by-default inbound
+firewall policy.
+
+SSH remains explicitly permitted on TCP port 22 so that
+remote SSH access is not unintentionally blocked.
+
+IPv4 and IPv6 SSH access are covered by the firewall rule.
+
+7. Conclusion
+
+The host firewall was successfully enabled and configured
+with a restrictive inbound default policy while preserving
+SSH connectivity.
+
+Further hardening controls can now be investigated.

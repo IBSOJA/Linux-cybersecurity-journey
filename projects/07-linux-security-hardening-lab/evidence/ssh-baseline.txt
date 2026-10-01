@@ -1,0 +1,97 @@
+Project 07 — Linux Security Hardening Lab
+SSH BASELINE EVIDENCE
+
+Date: 2026-09-17
+
+1. SSH Service Architecture
+
+The system uses systemd socket activation for OpenSSH.
+
+The ssh.socket unit is active and listens on:
+
+0.0.0.0:22
+[::]:22
+
+The ssh.service unit is triggered by ssh.socket.
+
+The SSH service definition uses:
+
+RuntimeDirectory=sshd
+RuntimeDirectoryMode=0755
+
+The /run/sshd directory was created automatically when
+ssh.service was started.
+
+2. SSH Configuration Validation
+
+Command:
+
+sudo sshd -t
+
+Result:
+
+No errors were reported.
+
+The SSH configuration passed syntax validation.
+
+3. Effective SSH Configuration
+
+Command:
+
+sudo sshd -T | grep -E '^(port|listenaddress|permitrootlogin|passwordauthentication|pubkeyauthentication|maxauthtries|maxsessions|x11forwarding)'
+
+Result:
+
+port 22
+listenaddress [::]:22
+listenaddress 0.0.0.0:22
+maxauthtries 6
+maxsessions 10
+permitrootlogin without-password
+pubkeyauthentication yes
+passwordauthentication yes
+x11forwarding yes
+
+4. Security Observations
+
+SSH is listening on all IPv4 and IPv6 interfaces on TCP port 22.
+
+Root password authentication is prohibited because
+PermitRootLogin is set to without-password.
+
+However, password authentication is currently enabled for
+SSH users.
+
+Public-key authentication is enabled.
+
+Maximum authentication attempts are currently set to 6.
+
+Maximum SSH sessions are currently set to 10.
+
+X11 forwarding is currently enabled.
+
+5. Hardening Opportunities
+
+Potential SSH hardening controls include:
+
+* Confirming functional public-key authentication.
+* Disabling password-based SSH authentication after key access
+  has been verified.
+* Evaluating whether X11 forwarding is required.
+* Reviewing authentication-attempt limits.
+* Reviewing other SSH security options where appropriate.
+
+No SSH configuration changes were made during this baseline
+assessment.
+
+6. Conclusion
+
+The SSH configuration was successfully inspected and validated.
+
+The baseline shows that SSH is protected against root password
+authentication, but ordinary password authentication remains
+enabled.
+
+Further SSH hardening will be performed only after ensuring that
+an alternative authenticated access method is available.
+

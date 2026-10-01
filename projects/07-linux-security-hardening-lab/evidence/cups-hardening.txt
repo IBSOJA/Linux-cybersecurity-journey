@@ -1,0 +1,186 @@
+Project 07 — Linux Security Hardening Lab
+Evidence: CUPS Service Hardening
+Date: 2026-10-01
+
+1. Objective
+-------------
+Investigate the CUPS printing service, determine whether printing functionality is required in the current Ubuntu VirtualBox environment, assess its dependencies and network exposure, and disable it if it is not required.
+
+2. Baseline
+-----------
+Service: cups.service
+Description: CUPS Scheduler
+Initial state: active (running)
+Initial enablement: enabled
+Main process: /usr/sbin/cupsd -l
+Main PID: 1478
+
+CUPS was triggered by:
+
+cups.path
+cups.socket
+
+The CUPS service unit contained:
+
+Requires=cups.socket
+
+and was installed through:
+
+printer.target
+multi-user.target
+
+3. Dependency Investigation
+---------------------------
+Reverse dependency analysis showed:
+
+cups.service
+└─multi-user.target
+  └─graphical.target
+
+No specific application or service was identified as requiring CUPS.
+
+4. Printer Configuration Investigation
+---------------------------------------
+The following commands were used:
+
+lpstat -p -d
+
+Result:
+lpstat: No destinations added.
+no system default destination
+
+The following command was also used:
+
+lpstat -a
+
+Result:
+lpstat: No destinations added.
+
+This indicates that no printer destinations or configured print queues were present in the current environment.
+
+The command:
+
+lpinfo -v | head -20
+
+returned:
+
+lpinfo: Forbidden
+
+This result was treated as an access restriction and was not interpreted as evidence that no printer devices exist.
+
+5. Network Exposure
+-------------------
+Initial CUPS listeners were checked with:
+
+sudo ss -lntup | grep -E '(:631\b|cups)'
+
+Result:
+
+tcp LISTEN 127.0.0.1:631
+tcp LISTEN [::1]:631
+
+CUPS was therefore listening only on loopback interfaces rather than on the VM's network interface.
+
+No remote network listener on port 631 was identified.
+
+6. Temporary Hardening Test
+---------------------------
+CUPS was temporarily stopped with:
+
+sudo systemctl stop cups.service
+
+Result:
+
+cups.service = inactive
+
+7. Functionality Verification
+-----------------------------
+After stopping CUPS, the following services were checked:
+
+cups.service:
+inactive
+
+ssh.service:
+active
+
+NetworkManager.service:
+active
+
+systemd-resolved.service:
+active
+
+Network listeners were checked with:
+
+sudo ss -lntup | grep -E '(:22\b|:53\b|:631\b)'
+
+Results showed:
+
+DNS listeners on port 53 remained available.
+SSH remained available on port 22.
+No CUPS listener remained on port 631.
+
+The temporary stop therefore did not disrupt SSH, network management, DNS resolution, or the core networking functions required by the lab.
+
+8. Permanent Hardening
+----------------------
+Because no printer destinations were configured, no specific service dependency was identified, CUPS was only locally exposed, and the temporary stop test did not affect required system functionality, CUPS was permanently disabled.
+
+The following command was used:
+
+sudo systemctl disable cups.service cups.socket cups.path
+
+Systemd removed the associated startup links for:
+
+cups.service
+cups.socket
+cups.path
+
+9. Final Verification
+----------------------
+Enablement checks:
+
+systemctl is-enabled cups.service
+systemctl is-enabled cups.socket
+systemctl is-enabled cups.path
+
+Results:
+
+cups.service = disabled
+cups.socket = disabled
+cups.path = disabled
+
+Activity checks:
+
+systemctl is-active cups.service
+systemctl is-active cups.socket
+systemctl is-active cups.path
+
+Results:
+
+cups.service = inactive
+cups.socket = inactive
+cups.path = inactive
+
+10. Security Assessment
+-----------------------
+CUPS was not required by another identified service in this environment and no printer queues were configured.
+
+Although CUPS was initially listening on port 631, the listeners were restricted to localhost and were therefore not directly exposed through the VM's network interface.
+
+Disabling CUPS reduces the number of unnecessary services and associated activation mechanisms running in this specific VirtualBox security laboratory environment.
+
+This is an environment-specific hardening decision. If printing is required in the future, CUPS and its associated socket/path activation units can be re-enabled.
+
+11. Conclusion
+--------------
+CUPS was investigated through service status, unit configuration, dependency analysis, printer configuration checks, network exposure checks, and a controlled stop test.
+
+The temporary stop confirmed that disabling CUPS did not disrupt SSH, DNS resolution, NetworkManager, or required network connectivity.
+
+Final state:
+
+cups.service = disabled / inactive
+cups.socket = disabled / inactive
+cups.path = disabled / inactive
+
+CUPS remains installed and can be re-enabled if printing functionality becomes necessary.

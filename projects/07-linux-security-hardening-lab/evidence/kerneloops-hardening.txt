@@ -1,0 +1,154 @@
+Project 07 — Linux Security Hardening Lab
+Evidence: kerneloops Service Hardening
+Date: 2026-09-30
+
+1. Objective
+-------------
+Investigate the kerneloops service, determine whether it is required in the current Ubuntu VirtualBox environment, assess its network exposure and dependencies, and disable it if it is not required.
+
+2. Baseline
+-----------
+Service: kerneloops.service
+Description: Tool to automatically collect and submit kernel crash signatures
+Initial state: active (running)
+Initial enablement: enabled
+User: kernoops
+Group: adm
+Installation target: multi-user.target
+
+The service is designed to collect kernel crash signatures and may submit crash information according to its configuration.
+
+3. Dependency Investigation
+---------------------------
+Reverse dependency analysis showed:
+
+kerneloops.service
+└─multi-user.target
+  └─graphical.target
+
+No specific application or service was identified as requiring kerneloops.service.
+
+4. Network Exposure
+-------------------
+Network socket checks produced no output for kerneloops.
+
+Commands used:
+
+sudo ss -lntup | grep -i kerneloops
+sudo ss -lxnp | grep -i kerneloops
+
+Result:
+No listening TCP, UDP, or Unix socket associated with kerneloops was identified.
+
+5. Crash/Error Investigation
+-----------------------------
+Kernel log searches were performed for common serious kernel error indicators.
+
+Commands used:
+
+sudo grep -iE 'oops|kernel panic|BUG:|general protection fault' /var/log/kern.log 2>/dev/null | tail -20
+
+sudo journalctl -k --no-pager | grep -iE 'oops|kernel panic|BUG:|general protection fault' | tail -20
+
+Result:
+No matching kernel Oops, kernel panic, BUG, or general protection fault messages were found in the searched logs.
+
+This does not prove that the system has never experienced kernel problems; it only records that no matching evidence was found in the locations searched.
+
+6. Configuration and Privacy Consideration
+-------------------------------------------
+The kerneloops configuration contained:
+
+allow-submit = ask
+allow-pass-on = yes
+submit-url = http://oops.kernel.org/submitoops.php
+
+The configuration indicates that crash information can be submitted according to the configured submission behavior. The service therefore provides crash-reporting functionality rather than a core networking or remote-access function.
+
+7. Temporary Hardening Test
+---------------------------
+The service was temporarily stopped with:
+
+sudo systemctl stop kerneloops.service
+
+Result:
+Service stopped successfully and entered the inactive (dead) state.
+
+A systemd daemon reload was then performed:
+
+sudo systemctl daemon-reload
+
+8. Functionality Verification
+-----------------------------
+After stopping kerneloops, the following critical services and functions were verified:
+
+NetworkManager.service:
+active
+
+systemd-resolved.service:
+active
+
+graphical.target:
+active
+
+ssh.service:
+active
+
+Internet/DNS connectivity:
+ping -c 3 google.com
+
+Result:
+3 packets transmitted, 3 received, 0% packet loss.
+
+The temporary stop of kerneloops did not disrupt networking, DNS resolution, graphical operation, SSH, or Internet connectivity.
+
+9. Permanent Hardening
+----------------------
+The service was permanently disabled with:
+
+sudo systemctl disable kerneloops.service
+
+Systemd removed the automatic startup link:
+
+/etc/systemd/system/multi-user.target.wants/kerneloops.service
+
+10. Final Verification
+----------------------
+Final enablement check:
+
+systemctl is-enabled kerneloops.service
+
+Result:
+disabled
+
+Final activity check:
+
+systemctl is-active kerneloops.service
+
+Result:
+inactive
+
+Final status:
+kerneloops.service - Tool to automatically collect and submit kernel crash signatures
+Loaded: loaded
+Enabled: disabled
+Active: inactive (dead)
+
+11. Security Assessment
+-----------------------
+kerneloops was not required by another specific service in this environment and did not expose a network listening socket.
+
+The service provides kernel crash reporting functionality. Disabling it reduces the number of automatically running services in this particular VirtualBox environment.
+
+This is an environment-specific hardening decision. If kernel crash reporting is required for troubleshooting or operational monitoring in another environment, the service may be re-enabled.
+
+12. Conclusion
+--------------
+kerneloops.service was investigated, temporarily stopped, and permanently disabled after verifying that core networking, DNS, graphical operation, SSH, and Internet connectivity remained functional.
+
+Final state:
+
+kerneloops.service = disabled
+kerneloops.service = inactive (dead)
+
+The service remains installed and can be re-enabled if its crash-reporting functionality is required in the future.

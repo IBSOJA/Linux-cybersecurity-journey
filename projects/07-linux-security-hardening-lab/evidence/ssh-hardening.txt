@@ -1,0 +1,155 @@
+Project 07 — Linux Security Hardening Lab
+SSH HARDENING EVIDENCE
+
+Date: 2026-09-20
+
+BASELINE SUMMARY
+
+Before hardening, the effective SSH configuration showed:
+
+PasswordAuthentication yes
+PermitRootLogin without-password
+X11Forwarding yes
+MaxAuthTries 6
+
+These baseline values were recorded before the hardening changes.
+
+1. SSH HARDENING PREPARATION
+
+An Ed25519 SSH key pair was generated for the local user vboxuser.
+
+Private key:
+~/.ssh/id_ed25519
+
+Public key:
+~/.ssh/id_ed25519.pub
+
+The public key was added to:
+
+~/.ssh/authorized_keys
+
+SSH key-based authentication was tested successfully before disabling
+password authentication.
+
+
+2. SSH HARDENING CONFIGURATION
+
+A dedicated SSH configuration drop-in was created:
+
+/etc/ssh/sshd_config.d/99-hardening.conf
+
+The following settings were configured:
+
+PasswordAuthentication no
+PermitRootLogin no
+X11Forwarding no
+MaxAuthTries 3
+
+
+3. CONFIGURATION VALIDATION
+
+Command:
+
+sudo sshd -t
+
+Result:
+
+No output was returned.
+
+The SSH configuration passed syntax validation.
+
+
+4. EFFECTIVE CONFIGURATION VERIFICATION
+
+Command:
+
+sudo sshd -T | grep -E '^(permitrootlogin|passwordauthentication|maxauthtries|x11forwarding)'
+
+Effective configuration:
+
+maxauthtries 3
+permitrootlogin no
+passwordauthentication no
+x11forwarding no
+
+
+5. SSH SERVICE RELOAD
+
+Command:
+
+sudo systemctl reload ssh.service
+
+Result:
+
+The reload completed successfully.
+
+The SSH service remained active and running.
+
+The service reported:
+
+Received SIGHUP; restarting.
+Server listening on 0.0.0.0 port 22.
+Server listening on :: port 22.
+Reloaded ssh.service.
+
+
+6. POST-HARDENING KEY AUTHENTICATION TEST
+
+Command:
+
+ssh -o PreferredAuthentications=publickey -o PasswordAuthentication=no vboxuser@localhost
+
+Result:
+
+Authentication succeeded using the configured Ed25519 public key.
+
+The authenticated user was confirmed with:
+
+whoami
+
+Result:
+
+vboxuser
+
+
+7. PASSWORD AUTHENTICATION TEST
+
+Command:
+
+ssh -o PubkeyAuthentication=no -o PreferredAuthentications=password vboxuser@localhost
+
+Result:
+
+Permission denied (publickey).
+
+This confirmed that password-based SSH authentication was no longer
+accepted and public-key authentication was required.
+
+
+8. SECURITY ASSESSMENT
+
+SSH password authentication has been disabled.
+
+Root SSH login has been completely disabled.
+
+X11 forwarding has been disabled.
+
+The maximum number of authentication attempts has been reduced
+from 6 to 3.
+
+Public-key authentication remains functional and was successfully
+verified after the hardening changes.
+
+
+9. CONCLUSION
+
+SSH hardening was successfully implemented and verified.
+
+The configuration was validated before application, the SSH service
+was reloaded successfully, legitimate public-key authentication was
+tested after the changes, and password-only authentication was
+confirmed to be rejected.
+
+The SSH hardening process therefore provides a documented
+before-and-after security improvement while maintaining verified
+administrative access.

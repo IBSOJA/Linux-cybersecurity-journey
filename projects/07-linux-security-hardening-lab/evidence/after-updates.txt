@@ -1,0 +1,130 @@
+Project 07 — Linux Security Hardening Lab
+AFTER-UPDATE EVIDENCE
+
+Date: 2026-09-16
+
+1. Update Verification
+
+---
+
+The system was updated using:
+
+sudo apt upgrade
+
+The upgrade installed the Linux kernel:
+
+7.0.0-31-generic
+
+The system was rebooted after the upgrade.
+
+Current running kernel:
+
+7.0.0-31-generic
+
+2. Pending Updates After Upgrade
+
+---
+
+Command:
+
+apt list --upgradable
+
+Result:
+
+11 packages remain upgradable.
+
+The remaining packages are associated with updates that were deferred/phased during the upgrade, including:
+
+* dnsmasq-base
+* krb5-locales
+* libgssapi-krb5-2
+* libk5crypto3
+* libkrb5-3
+* libkrb5support0
+* libnetplan1
+* netplan-generator
+* netplan.io
+* power-profiles-daemon
+* python3-netplan
+
+3. Kernel Verification
+
+---
+
+Command:
+
+uname -r
+
+Result:
+
+7.0.0-31-generic
+
+The system successfully booted into the newly installed kernel.
+
+4. VirtualBox Guest Additions Verification
+
+---
+
+The VirtualBox Guest Additions modules were checked against the new kernel.
+
+Verified modules:
+
+* vboxguest
+* vboxvideo
+* vboxsf
+
+The modules reported matching kernel version information for:
+
+7.0.0-31-generic
+
+After reboot, vboxguest successfully loaded:
+
+vboxguest: Successfully loaded version 7.2.4 r170995
+
+VBoxService also started successfully:
+
+VBoxService 7.2.4 r170995
+
+5. VirtualBox Module Build Issue
+
+---
+
+During the kernel upgrade, the VirtualBox Guest Additions build process reported an error while compiling the vboxvideo graphics module against kernel 7.0.0-31-generic.
+
+The reported compilation errors involved VirtualBox graphics/DRM interfaces.
+
+Post-reboot verification showed that a vboxvideo module exists for kernel 7.0.0-31-generic and reports matching kernel version information.
+
+The vboxguest module successfully loaded after reboot.
+
+The system therefore successfully booted and the core VirtualBox Guest Additions integration remained functional.
+
+6. Kernel Module Security Observation
+
+---
+
+The kernel log reported:
+
+vboxguest: loading out-of-tree module taints kernel.
+
+It also reported that the module signature/key verification was not accepted by the kernel:
+
+vboxguest: module verification failed: signature and/or required key missing - tainting kernel
+
+Despite this warning, the module subsequently loaded successfully.
+
+This observation is recorded for investigation rather than treated as a failed kernel update.
+
+7. Verification Conclusion
+
+---
+
+The system successfully completed the kernel update and rebooted into:
+
+7.0.0-31-generic
+
+The new kernel is operational and the core VirtualBox Guest Additions integration is functioning.
+
+11 packages remain upgradable because some updates were deferred/phased.
+
+Further hardening work can continue after recording this post-update state.

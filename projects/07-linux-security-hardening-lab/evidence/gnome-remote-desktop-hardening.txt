@@ -1,0 +1,193 @@
+Project 07 — Linux Security Hardening Lab
+Evidence: GNOME Remote Desktop Hardening
+Date: 2026-09-28
+Host: Ubuntu 24.04.x LTS
+User: vboxuser
+
+1. Objective
+-------------
+Investigate GNOME Remote Desktop, determine whether it provides unnecessary
+remote-access functionality, verify its network exposure and dependencies,
+temporarily stop it to test system functionality, and permanently disable it
+if safe to do so.
+
+2. Baseline
+-----------
+Initial service status:
+
+gnome-remote-desktop.service was active/running and enabled.
+
+The service unit showed:
+
+Description=GNOME Remote Desktop
+User=gnome-remote-desktop
+ExecStart=/usr/libexec/gnome-remote-desktop-daemon --system
+WantedBy=graphical.target
+
+3. Remote Access Exposure Investigation
+---------------------------------------
+Checked for RDP and VNC listeners:
+
+sudo ss -lntup | grep -E 'gnome-remote-desktop|:3389\b|:5900\b'
+
+Result:
+No output.
+
+This indicated that GNOME Remote Desktop was not currently exposing
+RDP or VNC network listeners.
+
+GNOME Remote Desktop status was also checked with:
+
+sudo grdctl --system status
+
+Relevant result:
+
+Unit status: active
+RDP:
+    Status: disabled
+    Port: 3389
+    TLS certificate: (null)
+    TLS fingerprint: (null)
+    TLS key: (null)
+    Username: (empty)
+    Password: (empty)
+
+The RDP service was therefore disabled and had no configured credentials
+or TLS certificate.
+
+4. Dependency Investigation
+---------------------------
+Checked reverse dependencies with:
+
+systemctl list-dependencies --reverse gnome-remote-desktop.service
+
+Result:
+
+gnome-remote-desktop.service
+└─graphical.target
+
+Also checked:
+
+systemctl show gnome-remote-desktop.service -p WantedBy -p RequiredBy -p PartOf
+
+Result:
+
+PartOf=
+RequiredBy=
+WantedBy=graphical.target
+
+No other service was found to require GNOME Remote Desktop.
+
+5. Temporary Hardening Test
+---------------------------
+Stopped the service temporarily with:
+
+sudo systemctl stop gnome-remote-desktop.service
+
+The service became:
+
+Active: inactive (dead)
+
+No RDP or VNC listener appeared after stopping the service.
+
+6. System Functionality Verification
+-------------------------------------
+Verified that the graphical environment remained active:
+
+systemctl is-active graphical.target
+
+Result:
+active
+
+Verified the display manager:
+
+systemctl status gdm.service --no-pager
+
+Result:
+gdm.service remained active/running.
+
+Also verified that essential network services remained available.
+
+SSH continued listening on port 22.
+
+DNS remained available through systemd-resolved.
+
+CUPS remained available on the local loopback interface.
+
+7. Permanent Hardening
+-----------------------
+After confirming that stopping the service did not affect essential
+system functionality, permanently disabled it with:
+
+sudo systemctl disable gnome-remote-desktop.service
+
+Systemd removed the graphical.target.wants symlink.
+
+8. Final Verification
+----------------------
+Checked enablement:
+
+systemctl is-enabled gnome-remote-desktop.service
+
+Result:
+disabled
+
+Checked service status:
+
+systemctl status gnome-remote-desktop.service --no-pager
+
+Result:
+Active: inactive (dead)
+
+Final network listener check:
+
+sudo ss -lntup
+
+No RDP or VNC listeners were present.
+
+The following command also returned no output:
+
+sudo ss -lntup | grep -E ':3389\b|:5900\b'
+
+9. Final Network Exposure
+-------------------------
+Remaining relevant listeners:
+
+127.0.0.53:53       systemd-resolved
+127.0.0.54:53       systemd-resolved
+127.0.0.1:631        cupsd
+0.0.0.0:22           sshd
+[::1]:631            cupsd
+[::]:22              sshd
+
+GNOME Remote Desktop did not appear as a network listener.
+
+10. Security Assessment
+-----------------------
+GNOME Remote Desktop was active and enabled but was not providing an
+active RDP or VNC network listener.
+
+The service had no required service dependencies other than being wanted
+by graphical.target.
+
+After temporarily stopping the service, the graphical environment,
+display manager, SSH, DNS, and CUPS functionality remained operational.
+
+The service was therefore disabled to reduce unnecessary background
+services and minimize the system's remote-access attack surface.
+
+11. Conclusion
+--------------
+GNOME Remote Desktop was successfully investigated, tested, and
+permanently disabled without affecting essential system functionality.
+
+Final state:
+
+Service: disabled
+Runtime state: inactive (dead)
+RDP listener: none
+VNC listener: none
+Graphical environment: operational
+SSH: operational
+DNS: operational
+CUPS: operational

@@ -1,0 +1,15 @@
+● avahi-daemon.service - Avahi mDNS/DNS-SD Stack
+     Loaded: loaded (/usr/lib/systemd/system/avahi-daemon.service; enabled; preset: enabled)
+     Active: active (running) since Mon 2026-09-14 02:10:03 UTC; 6 days ago
+TriggeredBy: ● avahi-daemon.socket
+   Main PID: 906 (avahi-daemon)
+     Status: "avahi-daemon 0.8 starting up."
+      Tasks: 2 (limit: 3447)
+     Memory: 1.3M (peak: 1.8M)
+        CPU: 279ms
+     CGroup: /system.slice/avahi-daemon.service
+             ├─906 "avahi-daemon: running [Ubuntu.local]"
+             └─940 "avahi-daemon: chroot helper"
+
+Warning: some journal files were not opened due to insufficient permissions.
+enabled

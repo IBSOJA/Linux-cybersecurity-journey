@@ -1,0 +1,210 @@
+PROJECT 07 — LINUX SECURITY HARDENING LAB
+
+Evidence: Avahi and cups-browsed Hardening
+Date: 20 September 2026
+
+1. OBJECTIVE
+
+The objective of this hardening activity was to investigate unnecessary network-facing services, identify their dependencies, evaluate their security exposure, and disable services that were not required for the Ubuntu cybersecurity lab environment.
+
+The primary services investigated were:
+
+* avahi-daemon.service
+* avahi-daemon.socket
+* cups-browsed.service
+
+Avahi provides mDNS/DNS-SD service discovery and was observed listening on UDP port 5353 and additional dynamic UDP ports. cups-browsed provides automatic discovery and availability of remote CUPS printers.
+
+2. BASELINE
+
+Before hardening, Avahi was active and enabled.
+
+Avahi network listeners included:
+
+0.0.0.0:5353
+[::]:5353
+Dynamic UDP ports on IPv4 and IPv6
+
+The Avahi service was enabled at system startup.
+
+cups-browsed.service was also active and enabled.
+
+3. DEPENDENCY INVESTIGATION
+
+Initial attempts to stop Avahi resulted in the service restarting.
+
+Reverse dependency investigation showed:
+
+cups-browsed.service
+↓
+avahi-daemon.service
+
+The Avahi socket also triggered the Avahi service:
+
+avahi-daemon.socket
+↓
+avahi-daemon.service
+
+The cups-browsed service configuration contained:
+
+Wants=avahi-daemon.service
+
+This explained why stopping Avahi alone did not keep the service stopped.
+
+4. TEMPORARY HARDENING TEST
+
+cups-browsed.service was temporarily stopped:
+
+sudo systemctl stop cups-browsed.service
+
+The service stopped successfully with:
+
+Active: inactive (dead)
+
+Avahi was then stopped together with its activation socket:
+
+sudo systemctl stop avahi-daemon.service avahi-daemon.socket
+
+Both units successfully entered the inactive state.
+
+Network verification showed that the Avahi listeners disappeared.
+
+The following command produced no output:
+
+sudo ss -lunp | grep -E '(:5353\b|avahi-daemon)'
+
+5. FUNCTIONALITY VERIFICATION
+
+After stopping Avahi and cups-browsed, core system functionality was tested.
+
+CUPS remained operational:
+
+cups.service
+Active: active (running)
+
+SSH remained available:
+
+0.0.0.0:22
+[::]:22
+
+The network interface remained operational:
+
+enp0s3 UP
+
+DNS resolution remained operational through systemd-resolved.
+
+DNS configuration showed:
+
+8.8.8.8
+1.1.1.1
+192.168.0.1
+
+IP connectivity test:
+
+ping -c 3 1.1.1.1
+
+Result:
+
+3 packets transmitted
+3 packets received
+0% packet loss
+
+DNS and connectivity test:
+
+ping -c 3 google.com
+
+Result:
+
+3 packets transmitted
+3 packets received
+0% packet loss
+
+These tests confirmed that stopping Avahi and cups-browsed did not disrupt normal DNS resolution, Internet connectivity, SSH availability, or the CUPS scheduler.
+
+6. PERMANENT HARDENING
+
+After successful temporary testing, the services were permanently disabled.
+
+Commands used:
+
+sudo systemctl disable cups-browsed.service
+
+sudo systemctl disable avahi-daemon.service avahi-daemon.socket
+
+Verification:
+
+systemctl is-enabled cups-browsed.service
+Result: disabled
+
+systemctl is-enabled avahi-daemon.service
+Result: disabled
+
+systemctl is-enabled avahi-daemon.socket
+Result: disabled
+
+7. FINAL VERIFICATION
+
+Final service status:
+
+cups-browsed.service
+Loaded: disabled
+Active: inactive (dead)
+
+avahi-daemon.service
+Loaded: disabled
+Active: inactive (dead)
+
+avahi-daemon.socket
+Loaded: disabled
+Active: inactive (dead)
+
+Final Avahi listener check:
+
+sudo ss -lunp | grep -E '(:5353\b|avahi-daemon)'
+
+Result:
+
+No output.
+
+This confirmed that Avahi was no longer running or listening on UDP 5353 or its dynamic UDP ports.
+
+8. FINAL NETWORK EXPOSURE
+
+Remaining expected listeners included:
+
+SSH:
+0.0.0.0:22
+[::]:22
+
+CUPS:
+127.0.0.1:631
+[::1]:631
+
+systemd-resolved:
+127.0.0.53:53
+127.0.0.54:53
+
+CUPS remained restricted to localhost, while SSH remained intentionally available for remote administration and was previously hardened using public-key authentication.
+
+9. SECURITY ASSESSMENT
+
+The hardening reduced unnecessary network service exposure by disabling Avahi mDNS/DNS-SD service discovery and cups-browsed automatic remote printer discovery.
+
+The change removed Avahi's UDP 5353 and dynamic UDP listeners while preserving essential services including:
+
+* SSH
+* DNS resolution
+* Network connectivity
+* CUPS scheduler
+
+The investigation also demonstrated the importance of understanding systemd dependencies and socket activation before disabling services.
+
+10. CONCLUSION
+
+Avahi and cups-browsed were successfully investigated, tested, and permanently disabled in the laboratory environment.
+
+The hardening reduced unnecessary network exposure while maintaining core system functionality.
+
+This activity demonstrates a security-hardening methodology based on:
+
+Baseline → Investigation → Dependency Analysis → Controlled Change → Verification → Permanent Configuration → Documentation
